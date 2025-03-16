@@ -8,7 +8,6 @@
 # SPDX-FileCopyrightText: (C) 2025 mukyokyo
 
 import math, can, time
-from can.notifier import MessageRecipient
 from struct import pack, unpack, iter_unpack
 
 class CyberGear:
@@ -101,21 +100,21 @@ class CyberGear:
   INDEX_run_mode        = (0x7005, 'B')
   INDEX_iq_ref          = (0x7006, 'f')
   INDEX_spd_ref         = (0x700a, 'f')
-  INDEX_limit_torque    = (0x700b, 'f')
-  INDEX_cur_kp          = (0x7010, 'f')
-  INDEX_cur_ki          = (0x7011, 'f')
-  INDEX_cur_filt_gain   = (0x7014, 'f')
+  INDEX_limit_torque_2  = (0x700b, 'f')
+  INDEX_cur_kp_2        = (0x7010, 'f')
+  INDEX_cur_ki_2        = (0x7011, 'f')
+  INDEX_cur_filt_gain_2 = (0x7014, 'f')
   INDEX_loc_ref         = (0x7016, 'f')
-  INDEX_limit_spd       = (0x7017, 'f')
-  INDEX_limit_cur       = (0x7018, 'f')
-  INDEX_mechPos         = (0x7019, 'f')
-  INDEX_iqf             = (0x701a, 'f')
-  INDEX_mechVel         = (0x701b, 'f')
-  INDEX_VBUS            = (0x701c, 'f')
-  INDEX_rotation        = (0x701d, 'h')
-  INDEX_loc_kp          = (0x701e, 'f')
-  INDEX_spd_kp          = (0x701f, 'f')
-  INDEX_spd_ki          = (0x7020, 'f')
+  INDEX_limit_spd_2     = (0x7017, 'f')
+  INDEX_limit_cur_2     = (0x7018, 'f')
+  INDEX_mechPos_2       = (0x7019, 'f')
+  INDEX_iqf_2           = (0x701a, 'f')
+  INDEX_mechVel_2       = (0x701b, 'f')
+  INDEX_VBUS_2          = (0x701c, 'f')
+  INDEX_rotation_2      = (0x701d, 'h')
+  INDEX_loc_kp_2        = (0x701e, 'f')
+  INDEX_spd_kp_2        = (0x701f, 'f')
+  INDEX_spd_ki_2        = (0x7020, 'f')
 
   def __init__(self, bus):
     self.__canbus = bus
@@ -126,7 +125,9 @@ class CyberGear:
 
   @property
   def alarm(self):
-    return self.__alarm
+    r = self.__alarm
+    self.__alarm = []
+    return r
 
   def rxflush(self):
     t = time.time() + 1.0
@@ -337,6 +338,14 @@ class CyberGear:
           if ((r.arbitration_id >> 8) & 0xff == id) and ((r.arbitration_id >> 24) & 0xff == 0):
             return list(*iter_unpack('<Q', bytes(r.data)))[0]
 
+  # write param by index
+  def set_item_value (self, id, ind : tuple[int ,int] , val, echo = False) -> bool:
+    return self.type18(id, ind[0], val, ind[1], echo = echo) != None
+
+  # read param by index
+  def get_item_value (self, id, ind : tuple[int ,int], echo = False):
+    return self.type17(id, ind[0], ind[1], echo = echo)
+
   def shutdown(self):
     self.__canbus.shutdown()
 
@@ -378,43 +387,10 @@ if __name__ == "__main__":
 
   def set_runmode(cg, id, m, echo = False):
     if stop_motor(cg, id) != None:
-      return cg.type18(id, CyberGear.INDEX_run_mode[0], m, width = CyberGear.INDEX_run_mode[1], echo = echo)
+      return cg.set_item_value(id, CyberGear.INDEX_run_mode, m, echo = echo)
 
   def set_zero_position(cg, id, echo = False):
     return cg.type6(id, echo = echo)
-
-  def set_iq_ref(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_iq_ref[0], v, width = CyberGear.INDEX_iq_ref[1], echo = echo)
-
-  def set_spd_ref(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_spd_ref[0], v, width = CyberGear.INDEX_spd_ref[1], echo = echo)
-
-  def set_limit_torque(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_limit_torque[0], v, width = CyberGear.INDEX_limit_torque[1], echo = echo)
-
-  def set_cur_kp(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_cur_kp[0], v, width = CyberGear.INDEX_cur_kp[1], echo = echo)
-
-  def set_cur_ki(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_cur_ki[0], v, width = CyberGear.INDEX_cur_ki[1], echo = echo)
-
-  def set_cur_filt_gain(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_cur_filt_gain[0], v, width = CyberGear.INDEX_cur_filt_gain[1], echo = echo)
-
-  def set_loc_ref(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_loc_ref[0], v, width = CyberGear.INDEX_loc_ref[1], echo = echo)
-
-  def set_limit_spd(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_limit_spd[0], v, width = CyberGear.INDEX_limit_spd[1], echo = echo)
-
-  def set_limit_cur(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_limit_cur[0], v, width = CyberGear.INDEX_limit_cur[1], echo = echo)
-
-  def set_rotation(cg, id, v, echo = False):
-    return cg.type18(id, CyberGear.INDEX_rotation[0], v, width = CyberGear.INDEX_rotation[1],echo = echo)
-
-  def get_rotation(cg, id, echo = False):
-    return cg.type17(id, CyberGear.INDEX_rotation[0], width = CyberGear.INDEX_rotation[1], echo = echo)
 
   def dump1(cg, id, echo = False):
     result = ()
@@ -426,28 +402,28 @@ if __name__ == "__main__":
 
   def dump2(cg, id, echo = False):
     result = ()
-    for i in (CyberGear.INDEX_run_mode, CyberGear.INDEX_iq_ref, CyberGear.INDEX_spd_ref, CyberGear.INDEX_limit_torque, CyberGear.INDEX_cur_kp, CyberGear.INDEX_cur_ki, CyberGear.INDEX_cur_filt_gain, CyberGear.INDEX_loc_ref, CyberGear.INDEX_limit_spd, CyberGear.INDEX_limit_cur, CyberGear.INDEX_mechPos, CyberGear.INDEX_iqf, CyberGear.INDEX_mechVel, CyberGear.INDEX_VBUS, CyberGear.INDEX_rotation, CyberGear.INDEX_loc_kp, CyberGear.INDEX_spd_kp, CyberGear.INDEX_spd_ki):
-      r = cg.type17(id, i[0], width = i[1])
+    for ind in (cg.INDEX_run_mode, cg.INDEX_iq_ref, cg.INDEX_spd_ref, cg.INDEX_limit_torque_2, cg.INDEX_cur_kp_2, cg.INDEX_cur_ki_2, cg.INDEX_cur_filt_gain_2, cg.INDEX_loc_ref, cg.INDEX_limit_spd_2, cg.INDEX_limit_cur_2, cg.INDEX_mechPos_2, cg.INDEX_iqf_2, cg.INDEX_mechVel_2, cg.INDEX_VBUS_2, cg.INDEX_rotation_2, cg.INDEX_loc_kp_2, cg.INDEX_spd_kp_2, cg.INDEX_spd_ki_2):
+      r =  cg.get_item_value(id, ind)
       if r != None:
-        result += (i[0],r),
+        result += (ind[0], r),
         if echo:
-          match i[1]:
+          match ind[1]:
             case 'B':
-              print(f'${i[0]:04x} ${r:02x}')
+              print(f'${ind[0]:04x} ${r:02x}')
             case 'f':
-              print(f'${i[0]:04x} {r:.3f}')
+              print(f'${ind[0]:04x} {r:.3f}')
             case 'h':
-              print(f'${i[0]:04x} {r}')
+              print(f'${ind[0]:04x} {r}')
     return result
 
-  def getmemstr(cg, id, addrs):
+  def getmembystr(cg, id, indxess):
     s = ''
     dat = []
-    for adr in addrs:
-      if adr[0] > 0x7000:
-        dat += (adr[0], cg.type17(id, adr[0], width = adr[1])),
+    for ind in indxess:
+      if ind[0] > 0x7000:
+        dat += (ind[0], cg.type17(id, ind[0], width = ind[1])),
       else:
-        dat += (adr[0], cg.type9(id, adr[0])),
+        dat += (ind[0], cg.type9(id, ind[0])),
     for d in dat:
       n: Optional[int | str | float] = d[1]
       match n:
@@ -484,8 +460,8 @@ if __name__ == "__main__":
 
     print('MIT Ctrl mode')
     set_runmode(cg, id1, 0)
-    set_limit_spd(cg, id1, 5.0)
-    set_limit_cur(cg, id1, 2.0)
+    cg.set_item_value(id1, cg.INDEX_limit_spd, 5.0)
+    cg.set_item_value(id1, cg.INDEX_limit_cur, 2.0)
     start_motor(cg, id1)
     for p in tuple(range(32767, 65535, 1024)) + tuple(range(65535, 0, -1024)) + tuple(range(0, 32767, 1024)):
       '''
@@ -498,41 +474,53 @@ if __name__ == "__main__":
       cg.type1(id1, 32767, p, 32767, 50, 100)
       t = time.time() + 500 / 1000.0
       while t > time.time():
-        print(f'\r<{id1}> pos:{p:>6d} {getmemstr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_rotation))}\033[K', end='')
+        print(f'\r<{id1}> pos:{p:>6d} {getmembystr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_mechVel,cg.INDEX_rotation))}\033[K', end='')
+        a = cg.alarm
+        if a != []:
+          print(f'\n{a}')
         time.sleep(0.01)
 
     print('\nposition mode')
     set_runmode(cg, id1, 1)
-    set_limit_spd(cg, id1, 20.0)
-    set_limit_cur(cg, id1, 2.0)
+    cg.set_item_value(id1, cg.INDEX_limit_spd, 20.0)
+    cg.set_item_value(id1, cg.INDEX_limit_cur, 2.0)
     start_motor(cg, id1)
     for p in tuple(range(0, 100, 5)) + tuple(range(100, -100, -10)) + tuple(range(-100, 0, 5)):
       pos = p * 4 * math.pi / 100
-      set_loc_ref(cg, id1, pos)
+      cg.set_item_value(id1, cg.INDEX_loc_ref, pos)
       t = time.time() + 500 / 1000.0
       while t > time.time():
-        print(f'\r<{id1}> pos:{pos:>6.2f} {getmemstr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_rotation))}\033[K', end='')
+        print(f'\r<{id1}> pos:{pos:>6.2f} {getmembystr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_mechVel,cg.INDEX_rotation))}\033[K', end='')
+        a = cg.alarm
+        if a != []:
+          print(f'\n{a}')
         time.sleep(0.01)
 
     print('\nspeed mode')
     set_runmode(cg, id1, 2)
-    set_limit_cur(cg, id1, 2.0)
+    cg.set_item_value(id1, cg.INDEX_limit_cur, 2.0)
     start_motor(cg, id1)
     for s in tuple(range(0, 30, 1)) + tuple(range(30, -30, -1)) + tuple(range(-30, 0, 1)):
-      set_spd_ref(cg, id1, s)
+      cg.set_item_value(id1, cg.INDEX_spd_ref, s)
       t = time.time() + 500 / 1000.0
       while t > time.time():
-        print(f'\r<{id1}> vel:{s:>6.2f} {getmemstr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_rotation))}\033[K', end='')
+        print(f'\r<{id1}> velo:{s:>6.2f} {getmembystr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_mechVel,cg.INDEX_rotation))}\033[K', end='')
+        a = cg.alarm
+        if a != []:
+          print(f'\n{a}')
         time.sleep(0.01)
 
     print('\ncurrent mode')
     set_runmode(cg, id1, 3)
     start_motor(cg, id1)
     for c in tuple(range(0, 23, 1)) + tuple(range(23, -23, -1)) + tuple(range(-23, 0, 1)):
-      set_iq_ref(cg, id1,c)
+      cg.set_item_value(id1, cg.INDEX_iq_ref, c)
       t = time.time() + 200 / 1000.0
       while t > time.time():
-        print(f'\r<{id1}> cur:{c:>6.2f} {getmemstr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_rotation))}\033[K', end='')
+        print(f'\r<{id1}> cur:{c:>6.2f} {getmembystr(cg, id1,(cg.INDEX_boardTemp, cg.INDEX_iq, cg.INDEX_mechPos,cg.INDEX_mechVel,cg.INDEX_rotation))}\033[K', end='')
+        a = cg.alarm
+        if a != []:
+          print(f'\n{a}')
         time.sleep(0.01)
 
   except KeyboardInterrupt:
