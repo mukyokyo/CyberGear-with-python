@@ -11,8 +11,6 @@ import math, can, time
 from struct import pack, unpack, iter_unpack
 
 class CyberGear:
-  list_dict = [{"key":"key"+str(i), "value":"value"+str(i), "format":'b'} for i in range(100)]
-
   _fields_ = (
     { 'name':'Name',            'code':0x0000, 'format':'',  'unit':''},
     { 'name':'BarCode',         'code':0x0001, 'format':'',  'unit':''},
