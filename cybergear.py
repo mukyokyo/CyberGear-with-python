@@ -689,8 +689,8 @@ if __name__ == "__main__":
 
       print('MIT Ctrl mode')
       cg.set_runmode(target_id, 0)
-      cg.set_item(target_id, 'limit_spd', 5.0)
-      cg.set_item(target_id, 'limit_cur', 2.0)
+      cg.set_item(target_id, 'limit_spd_2', 5.0)
+      cg.set_item(target_id, 'limit_cur_2', 2.0)
       cg.start_motor(target_id)
       for p in tuple(range(32767, 65535, 1024)) + tuple(range(65535, 0, -1024)) + tuple(range(0, 32767, 1024)):
         cg.type1(target_id, 32767, p, 32767, 50, 100)
@@ -704,8 +704,8 @@ if __name__ == "__main__":
 
       print('\nposition mode')
       cg.set_runmode(target_id, 1)
-      cg.set_item(target_id, 'limit_spd', 20.0)
-      cg.set_item(target_id, 'limit_cur', 2.0)
+      cg.set_item(target_id, 'limit_spd_2', 20.0)
+      cg.set_item(target_id, 'limit_cur_2', 2.0)
       cg.start_motor(target_id)
       for p in tuple(range(0, 100, 5)) + tuple(range(100, -100, -10)) + tuple(range(-100, 0, 5)):
         pos = p * 4 * math.pi / 100
@@ -720,7 +720,7 @@ if __name__ == "__main__":
 
       print('\nspeed mode')
       cg.set_runmode(target_id, 2)
-      cg.set_item(target_id, 'limit_cur', 2.0)
+      cg.set_item(target_id, 'limit_cur_2', 2.0)
       cg.start_motor(target_id)
       for s in tuple(range(0, 30, 1)) + tuple(range(30, -30, -1)) + tuple(range(-30, 0, 1)):
         cg.set_item(target_id, 'spd_ref', s)
