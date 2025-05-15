@@ -5,7 +5,7 @@ It does not do much.
 
 ## Requirement
 
-- Raspberry Pi Zero 2 W  or  Linux  or  Windoes
+- Raspberry Pi Zero 2 W  or  Linux  or  Windows
 - Pmod CAN(socketcan) or  USB-CAN I/F (gs_usb or slcan, etc.)
 - Python
 
